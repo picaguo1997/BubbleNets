@@ -126,6 +126,7 @@ ap.add_argument("-m", "--move", default=False, action="store_true", help="move i
 args = vars(ap.parse_args())
 types = ('*.jpg', '*.JPG', '*.png', '*.jpeg')
 imagePaths = []
+# input: ./data/rawData/
 video_folders = args["folder"]
 videoList = sorted(next(os.walk(video_folders))[1])
 for i, videoName in enumerate(videoList):
@@ -152,16 +153,17 @@ for i, videoName in enumerate(videoList):
     #export files
     mainDir = os.getcwd()
     rawDataDir = os.path.join(mainDir, 'data', 'rawData')
-    outputDir = os.path.join(rawData, videoName)
-    clust_data_file = os.path.join(outputDir, 'cluster_data.pk')
-    clust_centroid_file = os.path.join(outputDir, 'cluster_centroid.pk')
+    outputDir = os.path.join(rawDataDir, videoName)
+    clust_data_file = os.path.join(outputDir, 'cluster_data_'+ str(k.k) +'.pk')
+    clust_centroid_file = os.path.join(outputDir, 'cluster_centroid_' + str(k.k)+ '.pk')
     pickle.dump(k.cluster_data, open(clust_data_file, 'wb')) # output the whole clustering result
     pickle.dump(k.cluster_IMGcentroid, open(clust_centroid_file, 'wb')) #output img indices as clusters' centroids
 
     clust_data = pickle.load(open(clust_data_file, 'rb'))
     clust_centroid = pickle.load(open(clust_centroid_file, 'rb'))
-    print(clust_data)
-    print(clust_centroid)
+    print(videoName, " is clustered!")
+    for key, value in clust_centroid.items():
+        print("Cluster ", key, " : frame ", value)
 
 #NOTE: modify
 """
