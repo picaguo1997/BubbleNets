@@ -21,20 +21,11 @@ def findIdx(videoName):
     filePath = os.path.join(resultDir, videoName, 'frame_selection')
     lines = open(os.path.join(filePath, 'BN0.txt')).readlines()
     BN0_idx = int(lines[2][:-1].split('.')[0])
-    BN0_dir = str(BN0_idx) + '.png'
+    #BN0_dir = str(BN0_idx) + '.png'
     lines = open(os.path.join(filePath, 'BNLF.txt')).readlines()
     BNLF_idx = int(lines[2][:-1].split('.')[0])
-    BNLF_dir = str(BNLF_idx) + '.png'
-    return BN0_idx, BN0_dir, BNLF_idx, BNLF_dir
-
-
-
-idx = {
-    'BN0': -1,
-    'BNLF': -1,
-    'BN0_dir': "",
-    'BNLF_dir': ""
-}
+    #BNLF_dir = str(BNLF_idx) + '.png'
+    return BN0_idx,  BNLF_idx
 
 cluster = {
     'k_3': {},
@@ -45,21 +36,32 @@ cluster = {
 
 result = {}
 
+writing = False
+clustering = False
+
 subdir = os.listdir(resultDir)
-for videoName in subdir:
-    if(videoName == '.DS_Store'):
-        continue
+if writing:
+    for videoName in subdir:
+        print(videoName)
+        if(videoName == '.DS_Store'):
+            continue
 
-    #cluster['k_3'], cluster['k_3_centroid'] = cluster(videoName, 3)
-    #cluster['k_5'], cluster['k_5_centroid'] = cluster(videoName, 5)
-    #cluster_exportPath = os.path.join(exportDir, 'cluster.pk')
-    #pickle.dump(cluster, open(cluster_exportPath, 'wb'))
+        if clustering:
+            cluster['k_3'], cluster['k_3_centroid'] = cluster(videoName, 3)
+            cluster['k_5'], cluster['k_5_centroid'] = cluster(videoName, 5)
 
-    idx['BN0'], idx['BN0_dir'], idx['BNLF'], idx['BNLF_dir'] = findIdx(videoName)
+        BN0, BNLF = findIdx(videoName)
+        result[videoName] = []
+        result[videoName].append((BN0, BNLF))
 
-    print(videoName, idx, cluster)
+        if clustering:
+            result[videoName]['cluster'] = cluster
 
-    result[videoName] = [].append(idx)
-    #result[videoName].append(cluster)
+    print(result)
 
-pickle.dump(result, open(os.path.join(exportDir, 'default_result.pk'), 'wb'))
+    pickle.dump(result, open(os.path.join(exportDir, 'default_result.pk'), 'wb'))
+
+else:
+    filename = 'default_result.pk'
+    result = pickle.load(open(os.path.join(exportDir, filename), 'rb'))
+    print(result)
