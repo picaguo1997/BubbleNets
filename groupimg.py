@@ -144,8 +144,8 @@ def groupimage(videoName, k):
     outputDir = os.path.join(rawDataDir, videoName)
     clust_data_file = os.path.join(outputDir, 'cluster_data_'+ str(k.k) +'.pk')
     clust_centroid_file = os.path.join(outputDir, 'cluster_centroid_' + str(k.k)+ '.pk')
-    #pickle.dump(k.cluster_data, open(clust_data_file, 'wb')) # output the whole clustering result
-    #pickle.dump(k.cluster_IMGcentroid, open(clust_centroid_file, 'wb')) #output img indices as clusters' centroids
+    pickle.dump(k.cluster_data, open(clust_data_file, 'wb')) # output the whole clustering result
+    pickle.dump(k.cluster_IMGcentroid, open(clust_centroid_file, 'wb')) #output img indices as clusters' centroids
 
     #clust_data = pickle.load(open(clust_data_file, 'rb'))
     #clust_centroid = pickle.load(open(clust_centroid_file, 'rb'))

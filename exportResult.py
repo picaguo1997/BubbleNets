@@ -5,17 +5,16 @@ mainDir = os.getcwd()
 exportDir = os.path.join(mainDir, 'Configurations')
 resultDir = os.path.join(mainDir, 'data', 'rawData')
 
-def cluster(videoName, k):
+def clusterImg(videoName, k):
     checked = True
     while(checked):
-        groupimage(videoName, k)
-        clust_file = os.path.join(os.getcwd(), 'data', 'rawData', videoName, 'cluster_centroid_'+str(k)+'.pk')
-        centroids = pickle.load(open(clust_file, 'rb'))
+        data, centroids = groupimage(videoName, k)
         checked = False
         for key, values in centroids.items():
             if not values:
                 checked = True
                 break
+
 
 def findIdx(videoName):
     filePath = os.path.join(resultDir, videoName, 'frame_selection')
@@ -27,35 +26,60 @@ def findIdx(videoName):
     #BNLF_dir = str(BNLF_idx) + '.png'
     return BN0_idx,  BNLF_idx
 
-cluster = {
-    'k_3': {},
-    'k_5': {},
-    'k_3_centroid': {},
-    'k_5_centroid': {}
-}
-
+cluster = {}
 result = {}
 
 writing = False
-clustering = False
+clustering = True
 
 subdir = os.listdir(resultDir)
+if clustering:
+    cluster[3] = {}
+    cluster[5] = {}
+    for videoName in subdir:
+        if(videoName == '.DS_Store'):
+            continue
+        k=3
+        loadDir = os.path.join(resultDir, videoName)
+        clusterImg(videoName, k)
+        dataPath = os.path.join(loadDir, 'cluster_data_' + str(k) + '.pk')
+        centPath = os.path.join(loadDir, 'cluster_centroid_' + str(k) + '.pk')
+        with open(dataPath, 'r') as f:
+            data = pickle.load(f)
+        with open(centPath, 'r') as f:
+            centroids = pickle.load(f)
+        #data = pickle.load(open(os.path.join(loadDir, 'cluster_data_' + str(k) + '.pk'), 'rb'))
+        #centroids = pickle.load(open(os.path.join(loadDir, 'cluster_centroid_' + str(k) + '.pk'), 'rb'))
+        cluster[k]['data'] = data
+        cluster[k]['centroid'] = centroids
+
+        k=5
+        clusterImg(videoName, k)
+        with open(os.path.join(loadDir, 'cluster_data_' + str(k) + '.pk'), 'r') as f:
+            data = pickle.load(f)
+        with open(os.path.join(loadDir, 'cluster_centroid_' + str(k) + '.pk'), 'r') as f:
+            centroids = pickle.load(f)
+        cluster[k]['data'] = data
+        cluster[k]['centroid'] = centroids
+
+        result[videoName]= cluster
+
+    print(result)
+    pickle.dump(result, open(os.path.join(exportDir, 'clustering.pk'), 'wb'))
+else:
+    filename = 'clustering.pk'
+    result = pickle.load(open(os.path.join(exportDir, filename), 'rb'))
+    print(result)
+
 if writing:
     for videoName in subdir:
         print(videoName)
         if(videoName == '.DS_Store'):
             continue
 
-        if clustering:
-            cluster['k_3'], cluster['k_3_centroid'] = cluster(videoName, 3)
-            cluster['k_5'], cluster['k_5_centroid'] = cluster(videoName, 5)
-
         BN0, BNLF = findIdx(videoName)
         result[videoName] = []
         result[videoName].append((BN0, BNLF))
-
-        if clustering:
-            result[videoName]['cluster'] = cluster
 
     print(result)
 
