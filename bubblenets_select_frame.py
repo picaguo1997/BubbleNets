@@ -2,11 +2,11 @@
 # Brent Griffin, 181127
 # Questions? griffb@umich.edu
 import numpy as np; import cv2; import IPython; import copy; import glob; import os
-import sys; 
+import sys;
 cwd = os.getcwd()
 sys.path.insert(0, os.path.join(cwd, 'methods', 'preprocess'));
 sys.path.insert(0, os.path.join(cwd, 'methods', 'annotate_suggest'));
-from grabCutClass import * 
+from grabCutClass import *
 from videoProcessor import *
 from annotation_suggester import *
 from color_hist_frame_select import *
@@ -86,7 +86,7 @@ def save_extra_image_copy(image_dir, video_dir, annotation_frame_num):
 	if not os.path.isdir(extra_image_dir):
 		os.makedirs(extra_image_dir)
 	cv2.imwrite(os.path.join(extra_image_dir, format(annotation_frame_num, '02d')
-		+ '_annotation_' + os.path.basename(image_dir).split('.')[0] + '.jpg'), 
+		+ '_annotation_' + os.path.basename(image_dir).split('.')[0] + '.jpg'),
 		cv2.imread(image_dir))
 
 def read_annotation_list(text_file):
@@ -102,6 +102,7 @@ def main():
 	mainDir = os.getcwd()
 	dataDir = os.path.join(mainDir, 'data')
 	rawDataDir = os.path.join(dataDir, 'rawData')
+	configDir = os.path.join(dataDir, 'Configurations')
 	# Get list of video directories.
 	videoList = sorted(next(os.walk(rawDataDir))[1])
 	# Preprocess through ResNet.
@@ -122,4 +123,4 @@ def main():
 	print ('\n\nFinished with all annotations!\n\n')
 
 if __name__ == "__main__":
-	main()	
+	main()

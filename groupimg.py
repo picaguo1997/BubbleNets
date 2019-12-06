@@ -20,8 +20,8 @@ class K_means:
     self.k = k
     self.cluster = [] # the index of cluster each image belongs to.
     self.cluster_ACTcentroid = [] # each cluster's actual centroid
-    self.cluster_IMGcentroid = {} # each cluster's img index closest to actual centroid
-    self.cluster_data = {} # image indices that belongs to each cluster. Key is cluster index. Values are image indices.
+    self.cluster_IMGcentroid = [] # each cluster's img index closest to actual centroid
+    self.cluster_data = [] # image indices that belongs to each cluster. Key is cluster index. Values are image indices.
     self.data = [] # features of each image
     self.end = [] # filenmaes of each image
     self.i = 0
@@ -101,22 +101,23 @@ class K_means:
           isover = False
     self.cluster_ACTcentroid = m
 
-  def export_clusters(self):
-    for k in range(self.k): #initialization
-        self.cluster_data[k] = []
-        self.cluster_IMGcentroid[k] = []
+  def export_clusters(self, nimages):
+    self.cluster_data = [[] for i in range(self.k)]
+    self.cluster_IMGcentroid = [[] for i in range(self.k)]
+
     for i in range(len(self.cluster)):
         self.cluster_data[self.cluster[i]].append(i)
-    for key, values in self.cluster_data.items():
-        print(key, values)
-        act_centroid = self.cluster_ACTcentroid[key]
-        min_dist = -1
-        for img_idx in values:
-            dist = self.manhattan_distance(self.data[img_idx], act_centroid)
-            if min_dist < 0 or dist <= min_dist:
-                min_dist = dist
-                self.cluster_IMGcentroid[key] = img_idx
-    print(self.cluster_IMGcentroid)
+
+    for k in range(len(self.cluster_data)):
+        clust = self.cluster_data[k]
+        act_centroid = self.cluster_ACTcentroid[k]
+        dist = []
+        for v in clust:
+            dist.append(self.manhattan_distance(self.data[v], act_centroid))
+        if dist:
+            self.cluster_IMGcentroid[k] = clust[dist.index(min(dist))]
+            #print(clust, self.cluster_IMGcentroid[k])
+    #print(self.cluster_IMGcentroid)
 
 
 def groupimage(videoName, k):
@@ -137,20 +138,10 @@ def groupimage(videoName, k):
     k = K_means(k,False,128)
     k.generate_k_clusters(imagePaths)
     k.rearrange_clusters()
-    k.export_clusters()
+    k.export_clusters(nimages)
 
-    mainDir = os.getcwd()
-    rawDataDir = os.path.join(mainDir, 'data', 'rawData')
-    outputDir = os.path.join(rawDataDir, videoName)
-    clust_data_file = os.path.join(outputDir, 'cluster_data_'+ str(k.k) +'.pk')
-    clust_centroid_file = os.path.join(outputDir, 'cluster_centroid_' + str(k.k)+ '.pk')
-    pickle.dump(k.cluster_data, open(clust_data_file, 'wb')) # output the whole clustering result
-    pickle.dump(k.cluster_IMGcentroid, open(clust_centroid_file, 'wb')) #output img indices as clusters' centroids
 
-    #clust_data = pickle.load(open(clust_data_file, 'rb'))
-    #clust_centroid = pickle.load(open(clust_centroid_file, 'rb'))
-    print(videoName, " is clustered!")
-    return k.cluster_data, k.cluster_IMGcentroid
+    return k.cluster_data, k.cluster_IMGcentroid, nimages
 
 """
 ap = argparse.ArgumentParser()
@@ -186,9 +177,6 @@ k.generate_k_clusters(imagePaths)
 k.rearrange_clusters()
 k.export_clusters()
 """
-
-mainDir = os.getcwd()
-print(mainDir)
 
 #NOTE: modify
 """
