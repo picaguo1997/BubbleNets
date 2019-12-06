@@ -78,9 +78,9 @@ if writing:
 
     print(result)
 
-    pickle.dump(result, open(os.path.join(exportDir, 'default_result.pk'), 'wb'))
+    pickle.dump(result, open(os.path.join(exportDir, 'result_3.pk'), 'wb'))
 
 else:
-    filename = 'default_result.pk'
+    filename = 'result_3.pk'
     result = pickle.load(open(os.path.join(exportDir, filename), 'rb'))
     #print(result)
