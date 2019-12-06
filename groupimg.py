@@ -50,7 +50,7 @@ class K_means:
       v = [float(p)/float(img.size[0]*img.size[1])*100  for p in np.histogram(np.asarray(img))[0]]
       if self.size :
         v += [osize[0], osize[1]]
-      pbar.update(1)
+      #pbar.update(1)
       i = self.i
       self.i += 1
       return [i, v, im]
@@ -108,6 +108,7 @@ class K_means:
     for i in range(len(self.cluster)):
         self.cluster_data[self.cluster[i]].append(i)
     for key, values in self.cluster_data.items():
+        print(key, values)
         act_centroid = self.cluster_ACTcentroid[key]
         min_dist = -1
         for img_idx in values:
@@ -115,8 +116,43 @@ class K_means:
             if min_dist < 0 or dist <= min_dist:
                 min_dist = dist
                 self.cluster_IMGcentroid[key] = img_idx
+    print(self.cluster_IMGcentroid)
 
 
+def groupimage(videoName, k):
+    types = ('*.jpg', '*.JPG', '*.png', '*.jpeg')
+    imagePaths = []
+    video_folders = './data/rawData/'
+    folder = os.path.join(video_folders, videoName, 'src')
+    if not folder.endswith("/") :
+        folder+="/"
+    for files in types :
+        imagePaths.extend(sorted(glob.glob(folder+files)))
+    nimages = len(imagePaths)
+    nfolders = int(math.log(k, 10))+1
+    if nimages <= 0 :
+        print("No images found!")
+        exit()
+    #pbar = tqdm(total=nimages)
+    k = K_means(k,False,128)
+    k.generate_k_clusters(imagePaths)
+    k.rearrange_clusters()
+    k.export_clusters()
+
+    mainDir = os.getcwd()
+    rawDataDir = os.path.join(mainDir, 'data', 'rawData')
+    outputDir = os.path.join(rawDataDir, videoName)
+    clust_data_file = os.path.join(outputDir, 'cluster_data_'+ str(k.k) +'.pk')
+    clust_centroid_file = os.path.join(outputDir, 'cluster_centroid_' + str(k.k)+ '.pk')
+    #pickle.dump(k.cluster_data, open(clust_data_file, 'wb')) # output the whole clustering result
+    #pickle.dump(k.cluster_IMGcentroid, open(clust_centroid_file, 'wb')) #output img indices as clusters' centroids
+
+    #clust_data = pickle.load(open(clust_data_file, 'rb'))
+    #clust_centroid = pickle.load(open(clust_centroid_file, 'rb'))
+    print(videoName, " is clustered!")
+    return k.cluster_data, k.cluster_IMGcentroid
+
+"""
 ap = argparse.ArgumentParser()
 ap.add_argument("-f", "--folder", required=True, help="path to image folder")
 ap.add_argument("-k", "--kmeans", type=int, default=5, help="how many groups")
@@ -129,41 +165,29 @@ imagePaths = []
 # input: ./data/rawData/
 video_folders = args["folder"]
 videoList = sorted(next(os.walk(video_folders))[1])
-for i, videoName in enumerate(videoList):
-    folder = os.path.join(video_folders, videoName, 'src')
-    print(folder)
-    if not folder.endswith("/") :
-    	folder+="/"
-    for files in types :
-    	imagePaths.extend(sorted(glob.glob(folder+files)))
-    nimages = len(imagePaths)
-    nfolders = int(math.log(args["kmeans"], 10))+1
-    if nimages <= 0 :
-    	print("No images found!")
-    	exit()
-    if args["resample"] < 16 or args["resample"] > 256 :
-    	print("-r should be a value between 16 and 256")
-    	exit()
-    pbar = tqdm(total=nimages)
-    k = K_means(args["kmeans"],args["size"],args["resample"])
-    k.generate_k_clusters(imagePaths)
-    k.rearrange_clusters()
-    k.export_clusters()
+#for i, videoName in enumerate(videoList):
+folder = os.path.join(video_folders, videoName, 'src')
+print(folder)
+if not folder.endswith("/") :
+    folder+="/"
+for files in types :
+    imagePaths.extend(sorted(glob.glob(folder+files)))
+nimages = len(imagePaths)
+nfolders = int(math.log(args["kmeans"], 10))+1
+if nimages <= 0 :
+    print("No images found!")
+    exit()
+if args["resample"] < 16 or args["resample"] > 256 :
+    print("-r should be a value between 16 and 256")
+    exit()
+pbar = tqdm(total=nimages)
+k = K_means(args["kmeans"],args["size"],args["resample"])
+k.generate_k_clusters(imagePaths)
+k.rearrange_clusters()
+k.export_clusters()
+"""
 
-    #export files
-    mainDir = os.getcwd()
-    rawDataDir = os.path.join(mainDir, 'data', 'rawData')
-    outputDir = os.path.join(rawDataDir, videoName)
-    clust_data_file = os.path.join(outputDir, 'cluster_data_'+ str(k.k) +'.pk')
-    clust_centroid_file = os.path.join(outputDir, 'cluster_centroid_' + str(k.k)+ '.pk')
-    pickle.dump(k.cluster_data, open(clust_data_file, 'wb')) # output the whole clustering result
-    pickle.dump(k.cluster_IMGcentroid, open(clust_centroid_file, 'wb')) #output img indices as clusters' centroids
 
-    clust_data = pickle.load(open(clust_data_file, 'rb'))
-    clust_centroid = pickle.load(open(clust_centroid_file, 'rb'))
-    print(videoName, " is clustered!")
-    for key, value in clust_centroid.items():
-        print("Cluster ", key, " : frame ", value)
 
 #NOTE: modify
 """
