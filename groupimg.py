@@ -187,7 +187,8 @@ k.rearrange_clusters()
 k.export_clusters()
 """
 
-
+mainDir = os.getcwd()
+print(mainDir)
 
 #NOTE: modify
 """

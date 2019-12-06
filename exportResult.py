@@ -30,7 +30,7 @@ cluster = {}
 result = {}
 
 writing = False
-clustering = True
+clustering = False
 
 subdir = os.listdir(resultDir)
 if clustering:
