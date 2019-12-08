@@ -14,8 +14,11 @@ Then everything should be fine.
 """
 mainDir = os.getcwd()
 #help yourself to change the directory:)
-videoName = 'scooter-black'
-UserDir = os.path.join(mainDir, 'results','OSVOS', videoName)
+videoName = 'mallard-fly'
+Default_UserDir = os.path.join(mainDir, 'results','OSVOS','Default', videoName)
+Clustered_UserDir = os.path.join(mainDir, 'results','OSVOS','Clustered', videoName)
 GTDir = os.path.join(mainDir, 'results', 'GroundTruth', videoName)
-J, F = segmentation_score(UserDir,GTDir)
-print(J,F)
+J, F = segmentation_score(Default_UserDir,GTDir)
+print(J+F)
+J, F = segmentation_score(Clustered_UserDir,GTDir)
+print(J+F)
